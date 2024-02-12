@@ -19,9 +19,24 @@ export async function activate(context: ExtensionContext) {
 		startClient(context);
 	});
 
+	let initCmd = vscode.commands.registerCommand(`ants.init`, () => {
+		let terminal = vscode.window.createTerminal("Terminal");
+		terminal.sendText("ants init");
+	});
+
+	let newCmd = vscode.commands.registerCommand(`ants.new`, async () => {
+		let title = await vscode.window.showInputBox({placeHolder: "Title"});
+		let dir = await vscode.window.showInputBox({placeHolder: "Directory"});
+		let terminal = vscode.window.createTerminal("Terminal");
+		terminal.sendText(`ants new -t ${title} ${dir}`);
+		console.log(`ants new -t ${title} ${dir}`);
+	});
+
 	context.subscriptions.push(
 		helloWorldCmd,
-		restartCmd
+		restartCmd,
+		initCmd,
+		newCmd
 	);
 
 	startClient(context)

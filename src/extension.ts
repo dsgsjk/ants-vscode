@@ -50,8 +50,8 @@ function startClient(context: ExtensionContext) {
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
 	let serverOptions: ServerOptions = {
-		run: { command: "ants", args: ["lsp"] },
-		debug: { command: "ants", args: ["lsp", "--log"] }
+		run: { command: "ants-ls", args: [] },
+		debug: { command: "ants-ls", args: [] }
 	};
 
 	let clientOptions: LanguageClientOptions = {

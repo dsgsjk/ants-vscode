@@ -26,7 +26,23 @@ export async function activate(context: ExtensionContext) {
 
 	let newCmd = vscode.commands.registerCommand(`ants.new`, async () => {
 		let title = await vscode.window.showInputBox({placeHolder: "Title"});
+		if(title === undefined) {
+			return;
+		}
+		if(title === '') {
+			vscode.window.showErrorMessage('empty title');
+			return;
+		}
+		
 		let dir = await vscode.window.showInputBox({placeHolder: "Directory"});
+		if(dir === undefined) {
+			return;
+		}
+		if(dir === '') {
+			vscode.window.showErrorMessage('empty directory');
+			return;
+		}
+		
 		let terminal = vscode.window.createTerminal("Terminal");
 		terminal.sendText(`ants new -t ${title} ${dir}`);
 		console.log(`ants new -t ${title} ${dir}`);

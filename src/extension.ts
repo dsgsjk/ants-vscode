@@ -79,8 +79,8 @@ export async function activate(context: ExtensionContext) {
 				<input type="text" id="date" placeholder="Date">
 				<input type="text" id="description" placeholder="Description">
 				<input type="text" id="tag" placeholder="Tag">
-
 				<input type="text" id="content" placeholder="Content">
+				<input type="text" id="has_link" placeholder="Has link">
 				<ul id="searchResults"></ul>
 
 				<script>
@@ -119,6 +119,12 @@ export async function activate(context: ExtensionContext) {
 						const query = event.target.value;
 						vscode.postMessage({ type: 'content', query });
 					});
+					
+					const has_link = document.getElementById('has_link');
+					has_link.addEventListener('input', (event) => {
+						const query = event.target.value;
+						vscode.postMessage({ type: 'has_link', query });
+					});
 		 
 					window.addEventListener('message', (event) => {
 						const message = event.data;
@@ -149,7 +155,7 @@ export async function activate(context: ExtensionContext) {
 		`;
 		
 		let terminal = vscode.window.createTerminal("Terminal");
-		let author = '', date = '', description = '', tag = '', content = '';
+		let author = '', date = '', description = '', tag = '', content = '', has_link = '';
 		
 		panel.webview.onDidReceiveMessage((message) => {
 			if (message.type === 'openFile') {
@@ -159,10 +165,8 @@ export async function activate(context: ExtensionContext) {
 				});
 			} else {
 				const query = message.query;
-				
 				if (message.type === 'author') {
 					author = query;
-
 				} else if (message.type == 'date') {
 					date = query;
 				} else if (message.type == 'description') {
@@ -170,8 +174,9 @@ export async function activate(context: ExtensionContext) {
 				} else if (message.type == 'tag') {
 					tag = query;
 				} else if (message.type == 'content') {
-
 					content = query;
+				} else if (message.type == 'has_link') {
+					has_link = query;
 				}
 				let s = '';
 				if(author != '') {
@@ -218,12 +223,21 @@ export async function activate(context: ExtensionContext) {
 						s += `&&content:${content}`;
 					}
 				}
-				console.log(s);
-				exec(`ants filter ${s}`, { cwd: path }, (error, stdout, stderr) => {
-					let fileResults = stdout.split('\n');
-					fileResults.pop();
-					panel.webview.postMessage({ type: 'searchResults', results: fileResults });
-				});
+				if(has_link != '') {
+					if(s == '') {
+						s = `has-link:${has_link}`;
+					} else {
+						s+= `&&has-link:${has_link}`;
+					}
+				}
+				// console.log(`ants list -f \"${s}\"`);
+				if(s != '') {
+					exec(`ants list -f \"${s}\"`, { cwd: path }, (error, stdout, stderr) => {
+						let fileResults = stdout.split('\n');
+						fileResults.pop();
+						panel.webview.postMessage({ type: 'searchResults', results: fileResults });
+					});
+				}
 			}
 		}, undefined, context.subscriptions);
 		

@@ -13,10 +13,6 @@ let client: LanguageClient;
 export async function activate(context: ExtensionContext) {
 	const folder = vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri) : undefined;
 	const path = folder ? folder.uri.fsPath : undefined;
-
-	let helloWorldCmd = vscode.commands.registerCommand(`ants.helloWorld`, () => {
-		vscode.window.showInformationMessage('Hello World!');
-	});
 	
 	let restartCmd = vscode.commands.registerCommand(`ants.restart`, async () => {
 		await stopClient();
@@ -70,28 +66,65 @@ export async function activate(context: ExtensionContext) {
 
 			<html>
 			<head>
-				<meta charset="UTF-8">
-				<title>File Search</title>
-			</head>
-
-			<body>
-	 			<input type="text" id="author" placeholder="Author"><br>
-				<input type="text" id="date" placeholder="Date"><br>
-				<input type="text" id="description" placeholder="Description"><br>
-				<input type="text" id="tag" placeholder="Tag"><br>
-				<input type="text" id="content" placeholder="Content"><br>
-				<input type="text" id="has_link" placeholder="Has link"><br>
-				Sort by:<br>
-				<input type="radio" id="sort_default" name="option" checked>
-				<label for="sort_default">Default</label><br>
-				<input type="radio" id="sort_title" name="option" value="title">
-				<label for="sort_title">Title</label><br>
-				<input type="radio" id="sort_author" name="option" value="author">
-				<label for="sort_author">Author</label><br>
-				<input type="radio" id="sort_time" name="option" value="time">
-				<label for="sort_time">Time</label><br>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Search UI</title>
+			<style>
+				body {
+					font-family: Arial, sans-serif;
+				}
+				.search-form {
+					width: 300px;
+					margin: 0 auto;
+				}
+				.search-form input[type="text"],
+				.search-form input[type="date"],
+				.search-form select {
+					width: 100%;
+					padding: 10px;
+					margin-bottom: 10px;
+					border: 1px solid #ccc;
+					border-radius: 4px;
+				}
 				
+				.search-form label {
+					font-weight: bold;
+					display: block;
+					margin-bottom: 5px;
+				}
+			</style>
+			</head>
+			<body>
+			<div class="search-form">
+				<label for="author">Author</label>
+	 			<input type="text" id="author" placeholder="Author">
+	 			
+	 			<label for="date">Date</label>
+				<input type="date" id="date" name="date">
+				
+				<label for="description">Description</label>
+				<input type="text" id="description" placeholder="Description">
+				
+				<label for="tag">Tag</label>
+				<input type="text" id="tag" placeholder="Tag">
+				
+				<label for="content">Content</label>
+				<input type="text" id="content" placeholder="Content">
+				
+				<label for="has_link">Has Link</label>
+				<input type="text" id="has_link" placeholder="Has link">
+				
+				<label for="sort">Sort by:</label>
+				<select id="sort">
+					<option value="default">Default</option>
+					<option value="title">Title</option>
+					<option value="author">Author</option>
+					<option value="time">Time</option>
+				</select>
+				
+				<label for="searchResults">Results:</label>
 				<ul id="searchResults"></ul>
+				</div>
 
 				<script>
 
@@ -104,7 +137,7 @@ export async function activate(context: ExtensionContext) {
 					});
 
 					const date = document.getElementById('date');
-					date.addEventListener('input', (event) => {
+					date.addEventListener('change', (event) => {
 						const query = event.target.value;
 						vscode.postMessage({ type: 'date', query });
 					});
@@ -134,24 +167,9 @@ export async function activate(context: ExtensionContext) {
 						vscode.postMessage({ type: 'has_link', query });
 					});
 					
-					const sort_default = document.getElementById('sort_default');
-					sort_default.addEventListener('change', (event) => {
-						vscode.postMessage({ type: 'sort_default'});
-					});
-					
-					const sort_title = document.getElementById('sort_title');
-					sort_title.addEventListener('change', (event) => {
-						vscode.postMessage({ type: 'sort_title'});
-					});
-					
-					const sort_author = document.getElementById('sort_author');
-					sort_author.addEventListener('change', (event) => {
-						vscode.postMessage({ type: 'sort_author'});
-					});
-					
-					const sort_time = document.getElementById('sort_time');
-					sort_time.addEventListener('change', (event) => {
-						vscode.postMessage({ type: 'sort_time'});
+					const sort = document.getElementById('sort');
+					sort.addEventListener('change', (event) => {
+						vscode.postMessage({ type: 'sort', query: sort.value});
 					});
 		 
 					window.addEventListener('message', (event) => {
@@ -193,16 +211,18 @@ export async function activate(context: ExtensionContext) {
 				});
 			} else {
 				// console.log(message.type);
-				if(message.type == 'sort_default') {
-					sort = '';
-				} else if(message.type == 'sort_title') {
-					sort = ' -s title';
-				} else if(message.type == 'sort_author') {
-					sort = ' -s author';
-				} else if(message.type == 'sort_time') {
-					sort = ' -s time';
+				const query = message.query;
+				if(message.type == 'sort') {
+					if(query == 'default') {
+						sort = '';
+					} else if(query == 'title') {
+						sort = ' -s title';
+					} else if(query == 'author') {
+						sort = ' -s author';
+					} else if(query == 'time') {
+						sort = ' -s time';
+					}
 				} else {
-					const query = message.query;
 					if (message.type === 'author') {
 						author = query;
 					} else if (message.type == 'date') {
@@ -284,13 +304,10 @@ export async function activate(context: ExtensionContext) {
 
 
 	context.subscriptions.push(
-		helloWorldCmd,
-
 		restartCmd,
 		initCmd,
 		newCmd,
 		filterCmd
-
 	);
 
 	startClient(context)

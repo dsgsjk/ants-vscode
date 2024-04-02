@@ -20,10 +20,6 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "ants.helloWorld",
-				"title": "ants: Hello World"
-			},
-			{
 				"command": "ants.restart",
 				"title": "ants: Restart"
 			},

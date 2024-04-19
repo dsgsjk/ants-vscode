@@ -34,6 +34,10 @@
 			{
 				"command": "ants.filter",
 				"title": "ants: Filter"
+			},
+			{
+				"command": "ants.graph",
+				"title": "ants: Graph"
 			}
 		]
 	},

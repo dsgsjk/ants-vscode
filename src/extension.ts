@@ -301,13 +301,25 @@ export async function activate(context: ExtensionContext) {
 		}, undefined, context.subscriptions);
 		
 	});
-
+	
+	let graphCmd = vscode.commands.registerCommand(`ants.graph`, () => {
+		exec(`ants graph -s`, { cwd: path }, (error, stdout, stderr) => {
+			const panel = vscode.window.createWebviewPanel(
+				'Graph',
+				'Graph',
+				vscode.ViewColumn.Beside,
+				{}
+			);
+			panel.webview.html = `${stdout}`;
+		});
+	});
 
 	context.subscriptions.push(
 		restartCmd,
 		initCmd,
 		newCmd,
-		filterCmd
+		filterCmd,
+		graphCmd
 	);
 
 	startClient(context)

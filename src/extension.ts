@@ -11,7 +11,7 @@ import {
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
-	const folder = vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri) : undefined;
+	const folder = vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri) : (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0] : undefined);
 	const path = folder ? folder.uri.fsPath : undefined;
 	
 	let restartCmd = vscode.commands.registerCommand(`ants.restart`, async () => {

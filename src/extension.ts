@@ -35,15 +35,13 @@ export async function activate(context: ExtensionContext) {
 		}
 		
 
-		let dir = await vscode.window.showInputBox({placeHolder: "Directory"});
+		let dir = await vscode.window.showInputBox({placeHolder: "Directory relative to the workspace root, defaults to the workspace root"});
 		if(dir === undefined) {
 			return;
 		}
 
 		if(dir === '') {
-			vscode.window.showErrorMessage('empty directory');
-			return;
-
+			dir = '.';
 		}
 		
 		exec(`ants new -t ${title} ${dir}`, { cwd: path }, (error, stdout, stderr) => {});
